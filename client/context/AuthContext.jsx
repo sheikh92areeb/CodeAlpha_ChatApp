@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }) => {
     // Login function to handle user authentication and socket connection
     const login = async (state, credentials) => {
         try {
-            const { data } = axios.post(`/api/auth/${state}`, credentials);
+            const { data } = await axios.post(`/api/auth/${state}`, credentials);
             if (data.success) {
                 setAuthUser(data.userData);
                 connectSocket(data.userData);
@@ -56,6 +56,19 @@ export const AuthProvider = ({ children }) => {
         axios.defaults.headers.common["token"] = null;
         toast.success("Logged out Successfully");
         socket.disconnect();
+    }
+
+    // Update profile function to handle user profile update
+    const updateProfile = async (body) => {
+        try {
+            const { data } = await axios.put('/api/auth/update-profile', body);
+            if (data.success) {
+                setAuthUser(data.user);
+                toast.success("Profile Updated Successfully");
+            }
+        } catch (error) {
+            toast.error(error.message);
+        }
     }
 
     // Connect socket function to handle socket connection and online users update
@@ -84,7 +97,10 @@ export const AuthProvider = ({ children }) => {
         axios,
         authUser,
         onlineUser,
-        socket
+        socket,
+        login,
+        logout,
+        updateProfile
     };
 
     return (
