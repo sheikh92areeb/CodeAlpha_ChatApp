@@ -14,6 +14,21 @@ export const AuthProvider = ({ children }) => {
     const [authUser, setAuthUser] = useState(null);
     const [onlineUser, setOnlineUser] = useState([]);
     const [socket, setSocket] = useState(null);
+
+    // Connect socket function to handle socket connection and online users update
+    const connectSocket = (userData) => {
+        if (!userData || socket?.connected) return
+        const newSocket = io(backendurl, {
+            query: {
+                userId: userData._id
+            }
+        });
+        newSocket.connect();
+        setSocket(newSocket);
+        newSocket.on("getOnlineUsers", (userIds)=> {
+            setOnlineUser(userIds);
+        });
+    }
     
     // Check User is Authenticated and if so, set the user data and connect the socket
     const checkAuth = async () => {
@@ -67,23 +82,8 @@ export const AuthProvider = ({ children }) => {
                 toast.success("Profile Updated Successfully");
             }
         } catch (error) {
-            toast.error(error.message);
+            toast.error(error);
         }
-    }
-
-    // Connect socket function to handle socket connection and online users update
-    const connectSocket = (userData) => {
-        if (!userData || socket?.connected) return
-        const newSocket = io(backendurl, {
-            query: {
-                userId: userData._id
-            }
-        });
-        newSocket.connect();
-        setSocket(newSocket);
-        newSocket.on("getOnlineUsers", (userIds)=> {
-            setOnlineUser(userIds);
-        });
     }
 
     useEffect(()=>{
